@@ -6,6 +6,13 @@
 app = 'mindsdb'
 primary_region = 'fra'
 
+[env]
+  MINDSDB_STORAGE_DIR = "/root/mindsdb_data"
+
+[mounts]
+  source = "mindsdb_data"
+  destination = "/root/mindsdb_data"
+
 [http_service]
   internal_port = 80
   force_https = true
@@ -18,3 +25,4 @@ primary_region = 'fra'
   memory = '2gb'
   cpu_kind = 'shared'
   cpus = 2
+
