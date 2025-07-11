@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  mindsdb-proxy:
+    build: .
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # Required: HTTP Basic Auth users (generate with: htpasswd -c .htpasswd username)
+      - NGINX_HTPASSWD=${NGINX_HTPASSWD}
+      
+      # Optional: Enable HTTPS with Let's Encrypt
+      - ENABLE_HTTPS=${ENABLE_HTTPS:-false}
+      - DOMAIN=${DOMAIN}
+      - EMAIL=${EMAIL}
+      
+      # MindsDB configuration
+      - MINDSDB_STORAGE_DIR=/root/mindsdb_data
+    volumes:
+      # Persistent storage for MindsDB data
+      - mindsdb_data:/root/mindsdb_data
+      
+      # Persistent storage for Let's Encrypt certificates
+      - letsencrypt_data:/etc/letsencrypt
+    restart: unless-stopped
+
+volumes:
+  mindsdb_data:
+  letsencrypt_data:
