@@ -10,11 +10,14 @@ fi
 
 echo "$NGINX_HTPASSWD" > /etc/nginx/auth/.htpasswd
 
-# Generate DH parameters for SSL if they don't exist
-if [ ! -f /etc/ssl/certs/dhparam.pem ]; then
+# Generate DH parameters for SSL if they don't exist (store in persistent volume)
+if [ ! -f /etc/letsencrypt/dhparam.pem ]; then
     echo "Generating DH parameters..."
-    openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+    openssl dhparam -out /etc/letsencrypt/dhparam.pem 2048
 fi
+
+# Link to expected location
+ln -sf /etc/letsencrypt/dhparam.pem /etc/ssl/certs/dhparam.pem
 
 # Handle Let's Encrypt setup if ENABLE_HTTPS is set
 if [ "$ENABLE_HTTPS" = "true" ]; then
