@@ -71,17 +71,18 @@ EOF
         # Obtain certificate
         certbot --nginx -d "$DOMAIN" --email "$EMAIL" --agree-tos --non-interactive --redirect || {
             echo "Failed to obtain SSL certificate"
-            kill $NGINX_PID
+            kill $NGINX_PID 2>/dev/null || true
             exit 1
         }
         
         # Stop temporary nginx
-        kill $NGINX_PID
+        kill $NGINX_PID 2>/dev/null || true
         wait $NGINX_PID 2>/dev/null || true
         
-        # Restore SSL-enabled config
+        # Restore SSL-enabled config (certbot already modified it)
         mv /etc/nginx/nginx.conf.ssl /etc/nginx/nginx.conf
-        sed -i "s/DOMAIN_PLACEHOLDER/$DOMAIN/g" /etc/nginx/nginx.conf
+    else
+        echo "SSL certificates already exist, skipping certificate generation"
     fi
     
     # Setup certificate renewal cron job
