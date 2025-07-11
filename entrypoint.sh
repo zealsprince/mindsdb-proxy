@@ -115,9 +115,23 @@ http {
 EOF
 fi
 
-# Start MindsDB (correct python module invocation, like the official image)
-nohup /venv/bin/python -Im mindsdb --config=/root/mindsdb_config.json --api=http,a2a,mcp > /tmp/mindsdb.log 2>&1 &
+# Start nginx in background
+nginx -g 'daemon off;' &
+NGINX_PID=$!
 
-# Start nginx in foreground
-nginx -g 'daemon off;'
+# Function to handle graceful shutdown
+cleanup() {
+    echo "Shutting down services..."
+    kill $NGINX_PID 2>/dev/null || true
+    nginx -s quit 2>/dev/null || true
+    wait $NGINX_PID 2>/dev/null || true
+    exit 0
+}
+
+# Set up signal handlers
+trap cleanup SIGTERM SIGINT
+
+# Start MindsDB in foreground (main process)
+# This way Docker will capture MindsDB logs directly
+exec /venv/bin/python -Im mindsdb --config=/root/mindsdb_config.json --api=http,a2a,mcp
 
